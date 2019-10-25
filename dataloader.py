@@ -8,6 +8,17 @@ def load_dataset(name='wine.data'):
     return dataset
 
 
+def normalize(X):
+    X = np.array(X)
+    for i in range(13):
+        total_sum = np.sum(X[:, i])
+        avg = total_sum / len(X[:, i])
+        var = np.var(X[:,i])
+        X[:, i] -= avg
+        X[:, i] /= var
+    return X
+
+
 def parse_dataset():
     dataset = load_dataset()
     test_dataset = np.random.choice(dataset, int(0.15 * len(dataset)), replace=False)
@@ -18,4 +29,4 @@ def parse_dataset():
     Y_train = [int(x.split(',')[0]) - 1 for x in train_dataset]
     Y_test = [int(x.split(',')[0]) - 1 for x in test_dataset]
 
-    return X_train, Y_train, X_test, Y_test
+    return normalize(X_train), Y_train, normalize(X_test), Y_test

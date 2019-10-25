@@ -2,14 +2,15 @@ import random
 from dataloader import parse_dataset
 from genetic import train, selection, cross_over, mutation, check_population
 from utils import get_sizes, create_nn_array, get_probab
+import torch
+
 POPULATION_SIZE = 10
-EPOCHS = 2
+EPOCHS = 5
 CHROMOSOME_SIZE = 13
 NUM_OFFSPRING = 2
-
 population = [[random.choice([1, 0]) for i in range(13)] for i in range(POPULATION_SIZE)]
-
 X_train, Y_train, X_test, Y_test = parse_dataset()
+
 
 def run_genetic_algorithm():
     global population
@@ -24,5 +25,6 @@ def run_genetic_algorithm():
         population = [first_offspring]
         population += [mutation(first_offspring) for i in range(POPULATION_SIZE - 1)]
         population = check_population(sizes, population)
+
 
 run_genetic_algorithm()
