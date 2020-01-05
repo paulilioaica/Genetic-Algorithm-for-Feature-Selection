@@ -29,4 +29,4 @@ def parse_dataset():
     Y_train = [int(x.split(',')[0]) - 1 for x in train_dataset]
     Y_test = [int(x.split(',')[0]) - 1 for x in test_dataset]
 
-    return normalize(X_train), Y_train, normalize(X_test), Y_test
+    return normalize(X_train), np.expand_dims(np.array(Y_train),axis=1), normalize(X_test), np.array(Y_test)

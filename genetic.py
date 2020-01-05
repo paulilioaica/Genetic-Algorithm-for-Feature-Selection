@@ -1,17 +1,17 @@
 import random
-import numpy as np
-import torch
-from torch import nn
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+import numpy as np
+
+random.seed(99)
+
 POPULATION_SIZE = 10
-EPOCHS = 5
+EPOCHS = 30
 CHROMOSOME_SIZE = 13
 NUM_OFFSPRING = 2
 max_accuracy = 0
-criterion = nn.CrossEntropyLoss()
 epoch_accuracy = [0 for i in range(EPOCHS)]
 BEST_CHROMOSOME = None
+
 
 def check_population(sizes, population):
     for i, size in enumerate(sizes):
@@ -20,51 +20,55 @@ def check_population(sizes, population):
     return population
 
 
-def train(neural_nets, optimizers, X_train, Y_train, X_test, Y_test, population):
-    global BEST_CHROMOSOME
+def train(neural_nets, X_train, Y_train, X_test, Y_test, population):
     global max_accuracy
+    global BEST_CHROMOSOME
     losses = [[] for i in range(POPULATION_SIZE)]
-    ########### train ##################
+    accuracy = [[] for i in range(POPULATION_SIZE)]
     for epoch in range(EPOCHS):
-        output_val = [[] for i in range(POPULATION_SIZE)]
-        for i, x in enumerate(X_train):
-            for j, net in enumerate(neural_nets):
-                x_local = [item for item in x]
-                optimizers[j].zero_grad()
-                x_local = [value for idx, value in enumerate(x_local) if population[j][idx] == 1]
-                output = net(torch.tensor(x_local).unsqueeze(0).to(device))
-                loss = criterion(output, torch.tensor(Y_train[i]).unsqueeze(0).to(device))
-                loss.backward()
-                optimizers[j].step()
-        for i, x in enumerate(X_test):
-            for j, net in enumerate(neural_nets):
-                x_local = [item for item in x]
-                x_local = [value for idx, value in enumerate(x_local) if population[j][idx] == 1]
-                net.eval()
-                output = net(torch.tensor(x_local).unsqueeze(0).to(device))
-                loss = criterion(output, torch.tensor(Y_test[i]).unsqueeze(0).to(device))
-                output_val[j].append(torch.argmax(output).item())
-                losses[j].append(loss.item())
 
-        avg_accuracy =[len(np.where(np.array(x) == np.array(Y_test))[0])/len(Y_test) for x in output_val]
-        if max_accuracy < max(avg_accuracy):
-            max_accuracy = max(avg_accuracy)
-            BEST_CHROMOSOME = population[np.argmax(np.array(max_accuracy))]
-        print(BEST_CHROMOSOME)
-        print(f"Average accuracy for this epoch is {avg_accuracy}%")
-        print(f"Maximum is {max_accuracy}")
-        print('\n')
-        epoch_accuracy[epoch] = avg_accuracy
+        for j, net in enumerate(neural_nets):
+            x_local = np.copy(X_train)
+            position = []
+            for idx in range(X_train.shape[1]):
+                if population[j][idx] == 0:
+                    position.append(idx)
 
+            x_local = np.delete(x_local, position, 1)
+            net.train(x_local, Y_train)
+
+        for j, net in enumerate(neural_nets):
+            x_local = np.copy(X_test)
+            position = []
+            for idx in range(X_train.shape[1]):
+                if population[j][idx] == 0:
+                    position.append(idx)
+            x_local = np.delete(x_local, position, 1)
+            output = net.predict(x_local)
+            loss = np.square(np.argmax(output, axis=1) - Y_test).mean()
+            acc = len(np.where(np.argmax(output, axis=1) == Y_test)[0]) / len(Y_test)
+            accuracy[j].append(acc)
+            losses[j].append(loss)
+
+
+    avg_accuracy = [sum(x) / len(x) for x in accuracy]
     losses = [sum(x) / len(x) for x in losses]
-    print(min(losses))
-    return losses
+    if max_accuracy < max(avg_accuracy):
+        max_idx = np.argmax(avg_accuracy)
+        max_accuracy = max(avg_accuracy)
+        BEST_CHROMOSOME = population[max_idx]
+        print(BEST_CHROMOSOME)
+        epoch_accuracy[epoch] = avg_accuracy
+        return losses, [x for x in BEST_CHROMOSOME], max_accuracy
+
+    epoch_accuracy[epoch] = avg_accuracy
+    return losses, None, max_accuracy
 
 
-def selection(losses: object) -> object:
+def selection(losses):
     ##### we select top 2 individuals to cross breed ############
-    first_candidate, second_candidate = random.choices(losses, losses, k=2)
-    return losses.index(first_candidate), losses.index(second_candidate)
+    first_candidate, second_candidate = (-np.array(losses)).argsort()[:2]
+    return first_candidate, second_candidate
 
 
 def cross_over(first_candidate, second_candidate):

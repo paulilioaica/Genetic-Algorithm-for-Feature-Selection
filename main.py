@@ -1,23 +1,33 @@
 import random
+
+import numpy as np
+
 from dataloader import parse_dataset
+import matplotlib.pyplot as plt
 from genetic import train, selection, cross_over, mutation, check_population
 from utils import get_sizes, create_nn_array, get_probab
-import torch
 
+random.seed(99)
 POPULATION_SIZE = 10
 EPOCHS = 5
 CHROMOSOME_SIZE = 13
 NUM_OFFSPRING = 2
 population = [[random.choice([1, 0]) for i in range(13)] for i in range(POPULATION_SIZE)]
 X_train, Y_train, X_test, Y_test = parse_dataset()
+accuracies = []
+chromosomes = []
+
+features = ['x0', 'x1', 'x2', 'x3', 'x4', 'x5', 'x6', 'x7', 'x8', 'x9', 'x10', 'x11', 'x12']
 
 
 def run_genetic_algorithm():
+    generation = 0
     global population
-    while True:
+    for i in range(200):
+        print("Training generation {}".format(generation))
         sizes = get_sizes(population)
-        nets, optimizers = create_nn_array(sizes)
-        losses = train(nets, optimizers, X_train, Y_train, X_test, Y_test, population)
+        nets = create_nn_array(sizes)
+        losses, BEST_CHROMOSOME, max_accuracy = train(nets, X_train, Y_train, X_test, Y_test, population)
         losses = get_probab(losses)
         first_candidate, second_candidate = selection(losses)
         first_offspring, second_offspring = cross_over(population[first_candidate], population[second_candidate])
@@ -25,6 +35,25 @@ def run_genetic_algorithm():
         population = [first_offspring]
         population += [mutation(first_offspring) for i in range(POPULATION_SIZE - 1)]
         population = check_population(sizes, population)
+        generation += 1
+        accuracies.append(max_accuracy)
+        if BEST_CHROMOSOME:
+            chromosomes.append(BEST_CHROMOSOME)
 
 
 run_genetic_algorithm()
+
+slope_chanes = np.diff(np.array(accuracies))
+
+points = np.nonzero(slope_chanes)[0] + 1
+chromosomes = [[str(x) for x in y] for y in chromosomes]
+print(chromosomes)
+plt.plot([i for i in range(200)], accuracies)
+plt.text(0.1, 0.1, "[" + "".join(chromosomes[0]) + "]", fontsize=8)
+for i in range(len(points)):
+    plt.text(points[i] + 0.01, accuracies[points[i]] + max(accuracies) / 150,
+             "[" + " ".join([x for j, x in enumerate(features) if chromosomes[i+1][j] == '1']) + "]", fontsize=8)
+plt.title("Accuracy of best chromosome through-out generations")
+plt.xlabel("Generations")
+plt.ylabel("Accuracies for best chromosome")
+plt.show()

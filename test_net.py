@@ -1,38 +1,26 @@
-import time
-
 import numpy as np
-import torch.nn as nn
-import torch.optim as optim
-import torch
-import random
-
-best_input = [1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0]
-best_input = [1 for i in range(13)]
+import matplotlib.pyplot as plt
 from dataloader import parse_dataset
-from net import NNet
+from genetic import EPOCHS
+from net import NeuralNetwork
 
-model = NNet(input_dim=best_input.count(1), num_of_classes=3)
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+model = NeuralNetwork(input_size=13, hidden_size=5, output_size=3)
 X_train, Y_train, X_test, Y_test = parse_dataset()
 losses = 0
-for epoch in range(100):
-    losses = 0
-    for i, x in enumerate(X_train):
-        x_local = [value for idx, value in enumerate(x) if best_input[idx] == 1]
-        optimizer.zero_grad()
-        output = model(torch.tensor(x_local).unsqueeze(0).float())
-        loss = criterion(output, torch.tensor(Y_train[i]).unsqueeze(0))
-        losses += loss.item()
-        loss.backward()
-        optimizer.step()
-    outputs = []
-    for i, x in enumerate(X_test):
-        model.eval()
-        x_local = [value for idx, value in enumerate(x) if best_input[idx] == 1]
-        output = model(torch.tensor(x_local).unsqueeze(0).float())
-        loss = criterion(output, torch.tensor(Y_test[i]).unsqueeze(0))
-        outputs.append(torch.argmax(output).item())
-    accuracy = len(np.where(np.array(Y_test) == np.array(outputs))[0]) / len(Y_test)
-    print(f"Accuracy is {accuracy * 100}%")
-    print(losses / len(X_train))
+losses_hist= []
+accuracy = []
+for epoch in range(50):
+    model.train(X_train, Y_train)
+
+
+    output = model.predict(X_test)
+    loss = np.square(np.argmax(output, axis=1) - Y_test).mean()
+    acc = len(np.where(np.argmax(output, axis=1) == Y_test)[0]) / len(Y_test)
+    losses_hist.append(loss)
+    accuracy.append(acc)
+
+plt.plot([i for i in range(50)],losses_hist )
+plt.title("Loss using all input dimensions")
+plt.xlabel("Epochs")
+plt.ylabel("Loss")
+plt.show()

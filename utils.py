@@ -1,12 +1,10 @@
 from torch import optim
-from genetic import device
-from net import NNet
+from net import NeuralNetwork
 
 
 def create_nn_array(sizes):
-    neural_nets = [NNet(sizes[i], num_of_classes=3).to(device) for i in range(len(sizes))]
-    optimizers = [optim.Adam(net.parameters(), lr=0.01) for net in neural_nets]
-    return neural_nets, optimizers
+    neural_nets = [NeuralNetwork(input_size=sizes[i], hidden_size=13, output_size=3) for i in range(len(sizes))]
+    return neural_nets
 
 
 def get_sizes(population):
