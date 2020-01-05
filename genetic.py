@@ -21,6 +21,7 @@ def check_population(sizes, population):
 
 
 def train(neural_nets, X_train, Y_train, X_test, Y_test, population):
+    # train EPOCHS for each network and test it on test data
     global max_accuracy
     global BEST_CHROMOSOME
     losses = [[] for i in range(POPULATION_SIZE)]

@@ -25,16 +25,16 @@ def run_genetic_algorithm():
     global population
     for i in range(200):
         print("Training generation {}".format(generation))
-        sizes = get_sizes(population)
-        nets = create_nn_array(sizes)
-        losses, BEST_CHROMOSOME, max_accuracy = train(nets, X_train, Y_train, X_test, Y_test, population)
-        losses = get_probab(losses)
+        sizes = get_sizes(population) # get the sizes of the new populations for the networks inputs
+        nets = create_nn_array(sizes)  # we create a list of neural networks with predefined size
+        losses, BEST_CHROMOSOME, max_accuracy = train(nets, X_train, Y_train, X_test, Y_test, population)# we train EPOCHS number for each network
+        losses = get_probab(losses) # we select the one with the smallest loss
         first_candidate, second_candidate = selection(losses)
-        first_offspring, second_offspring = cross_over(population[first_candidate], population[second_candidate])
-        first_offspring = mutation(first_offspring)
+        first_offspring, second_offspring = cross_over(population[first_candidate], population[second_candidate]) # cross over between top 2 candidates
+        first_offspring = mutation(first_offspring) # we mutate the result
         population = [first_offspring]
-        population += [mutation(first_offspring) for i in range(POPULATION_SIZE - 1)]
-        population = check_population(sizes, population)
+        population += [mutation(first_offspring) for i in range(POPULATION_SIZE - 1)] # create a population of individuals based on the best candidates
+        population = check_population(sizes, population) # we make sure no inidividual is only 0's
         generation += 1
         accuracies.append(max_accuracy)
         if BEST_CHROMOSOME:
