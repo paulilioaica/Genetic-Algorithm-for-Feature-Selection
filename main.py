@@ -42,18 +42,3 @@ def run_genetic_algorithm():
 
 
 run_genetic_algorithm()
-
-slope_chanes = np.diff(np.array(accuracies))
-
-points = np.nonzero(slope_chanes)[0] + 1
-chromosomes = [[str(x) for x in y] for y in chromosomes]
-print(chromosomes)
-plt.plot([i for i in range(200)], accuracies)
-plt.text(0.1, 0.1, "[" + "".join(chromosomes[0]) + "]", fontsize=8)
-for i in range(len(points)):
-    plt.text(points[i] + 0.01, accuracies[points[i]] + max(accuracies) / 150,
-             "[" + " ".join([x for j, x in enumerate(features) if chromosomes[i+1][j] == '1']) + "]", fontsize=8)
-plt.title("Accuracy of best chromosome through-out generations")
-plt.xlabel("Generations")
-plt.ylabel("Accuracies for best chromosome")
-plt.show()
