@@ -5,9 +5,9 @@ I trained a population for 200 generations to improve the accuracy of a neural n
 
 ##
 
-#####Neural Network trained for 50 epochs (trying to avoid overfit on small dataset) for baseline reference:
+####Neural Network trained for 50 epochs (trying to avoid overfit on small dataset) for baseline reference:
 
-#####***Accuracy***:
+####***Accuracy***:
 
 ![Accuracy](./pics/rfia_all_dimensions_accuracy.png)
 #####***Loss***:
