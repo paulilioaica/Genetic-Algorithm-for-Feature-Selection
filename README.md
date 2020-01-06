@@ -11,7 +11,7 @@ I trained a population for 200 generations to improve the accuracy of a neural n
 
 ![Accuracy](./pics/rfia_all_dimensions_accuracy.png)
 
-##### ***Loss***:
+### ***Loss***:
 
 ![Accuracy](./pics/rfia_loss_all_dimensions.png)
 ##
