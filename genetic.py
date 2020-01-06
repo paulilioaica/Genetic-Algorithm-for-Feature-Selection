@@ -36,6 +36,8 @@ def train(neural_nets, X_train, Y_train, X_test, Y_test, population):
                     position.append(idx)
 
             x_local = np.delete(x_local, position, 1)
+            print(x_local.shape)
+            print(net.weights1.shape)
             net.train(x_local, Y_train)
 
         for j, net in enumerate(neural_nets):

@@ -9,7 +9,7 @@ X_train, Y_train, X_test, Y_test = parse_dataset()
 losses = 0
 losses_hist= []
 accuracy = []
-for epoch in range(50):
+for epoch in range(EPOCHS):
     model.train(X_train, Y_train)
 
 
@@ -19,7 +19,7 @@ for epoch in range(50):
     losses_hist.append(loss)
     accuracy.append(acc)
 
-plt.plot([i for i in range(50)],losses_hist )
+plt.plot([i for i in range(EPOCHS)],losses_hist )
 plt.title("Loss using all input dimensions")
 plt.xlabel("Epochs")
 plt.ylabel("Loss")
